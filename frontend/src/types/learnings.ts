@@ -62,3 +62,15 @@ export type PracticeStats = {
   last_submission_at?: string | null;
 };
 
+export type AuthUser = {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+};
+
+export type AuthResponse = {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+};

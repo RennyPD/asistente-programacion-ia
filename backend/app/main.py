@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from app.db.database import create_db_and_tables, engine
 from app.models.models import User, LearningPath, Topic
-from app.routers import ai, learning_paths, progress, exercises
+from app.routers import ai, learning_paths, progress, exercises, auth
 
 
 app = FastAPI(
@@ -29,9 +29,9 @@ def seed_initial_data():
 
         if not existing_user:
             demo_user = User(
-                name="Estudiante Demo",
-                email="demo@ufhec.edu.do",
-                password_hash="demo123"
+            name="Estudiante Demo",
+            email="demo@ufhec.edu.do",
+            password_hash=auth.hash_password("demo123")
             )
             session.add(demo_user)
 
@@ -135,3 +135,4 @@ app.include_router(ai.router, prefix="/api/ai", tags=["Inteligencia Artificial"]
 app.include_router(learning_paths.router, prefix="/api/learning-paths", tags=["Rutas de aprendizaje"])
 app.include_router(progress.router, prefix="/api/progress", tags=["Progreso"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["Ejercicios"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Autenticación"])

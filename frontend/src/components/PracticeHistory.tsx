@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  getPracticeStats,
-  getSubmissions,
-} from "../services/exerciseService";
-import type { PracticeStats, Submission } from "../types/learning";
+import { getPracticeStats, getSubmissions } from "../services/exerciseService";
+import type { PracticeStats, Submission } from "../types/learnings";
 
 type PracticeHistoryProps = {
   userId: number;
@@ -22,26 +19,28 @@ export default function PracticeHistory({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadHistory();
+    const loadHistory = async () => {
+      try {
+        setLoading(true);
+
+        const topicFilter = showOnlySelectedTopic ? selectedTopicId : undefined;
+
+        const [statsData, submissionsData] = await Promise.all([
+          getPracticeStats(userId),
+          getSubmissions(userId, topicFilter),
+        ]);
+
+        setStats(statsData);
+        setSubmissions(submissionsData);
+      } catch (error) {
+        console.error("Error al cargar el historial:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistory(); // <-- La llamada debe ir AQUÍ, fuera de la función pero dentro del useEffect
   }, [userId, selectedTopicId, refreshKey, showOnlySelectedTopic]);
-
-  const loadHistory = async () => {
-    try {
-      setLoading(true);
-
-      const topicFilter = showOnlySelectedTopic ? selectedTopicId : undefined;
-
-      const [statsData, submissionsData] = await Promise.all([
-        getPracticeStats(userId),
-        getSubmissions(userId, topicFilter),
-      ]);
-
-      setStats(statsData);
-      setSubmissions(submissionsData);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <section className="card">
@@ -93,9 +92,7 @@ export default function PracticeHistory({
               <strong>Práctica #{submission.id}</strong>
 
               {submission.score !== null && submission.score !== undefined && (
-                <span className="history-score">
-                  {submission.score}/100
-                </span>
+                <span className="history-score">{submission.score}/100</span>
               )}
             </div>
 
@@ -108,9 +105,7 @@ export default function PracticeHistory({
               <strong>Ejercicio:</strong>
             </p>
 
-            <div className="history-text">
-              {submission.exercise}
-            </div>
+            <div className="history-text">{submission.exercise}</div>
 
             <p>
               <strong>Código enviado:</strong>
@@ -124,9 +119,7 @@ export default function PracticeHistory({
               <strong>Retroalimentación:</strong>
             </p>
 
-            <div className="history-text">
-              {submission.ai_feedback}
-            </div>
+            <div className="history-text">{submission.ai_feedback}</div>
           </article>
         ))}
       </div>

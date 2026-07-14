@@ -11,24 +11,29 @@ import {
   submitCodeForReview,
 } from "./services/exerciseService";
 import CodeEditor from "./components/CodeEditor";
+import PracticeHistory from "./components/PracticeHistory";
 import type {
   Exercise,
   LearningPath,
   ProgressSummary,
   Topic,
 } from "./types/learnings";
-import PracticeHistory from "./components/PracticeHistory";
 import "./App.css";
-
-const DEMO_USER_ID = 1;
+import AuthPage from "./components/AuthPage";
+import { clearAuthData, getStoredUser } from "./services/authService";
+import type { AuthUser } from "./types/learnings";
 
 function App() {
+  // ==========================================
+  // 1. ESTADOS (Siempre van al inicio)
+  // ==========================================
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
-  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
-const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(
+    getStoredUser(),
+  );
 
   const [progress, setProgress] = useState<ProgressSummary>({
     total_topics: 0,
@@ -39,7 +44,7 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   const [conceptAnswer, setConceptAnswer] = useState("");
   const [generatedExercise, setGeneratedExercise] = useState<Exercise | null>(
-    null
+    null,
   );
 
   const [code, setCode] = useState("# Escribe tu solución aquí");
@@ -49,18 +54,23 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [loadingConcept, setLoadingConcept] = useState(false);
   const [loadingExercise, setLoadingExercise] = useState(false);
   const [loadingReview, setLoadingReview] = useState(false);
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  useEffect(() => {
-    loadLearningPaths();
-  }, []);
+  // ==========================================
+  // 2. FUNCIONES DEL COMPONENTE
+  // ==========================================
+  const refreshProgress = async (learningPathId: number) => {
+    // Eliminado el "?" porque aquí el usuario SIEMPRE existe
+    const summary = await getProgressSummary(currentUser!.id, learningPathId);
+    setProgress(summary);
+  };
 
-  const loadLearningPaths = async () => {
-    const data = await getLearningPaths();
-    setLearningPaths(data);
-
-    if (data.length > 0) {
-      await selectLearningPath(data[0].id);
-    }
+  const clearExerciseArea = () => {
+    setConceptAnswer("");
+    setGeneratedExercise(null);
+    setCode("# Escribe tu solución aquí");
+    setFeedback("");
+    setScore(null);
   };
 
   const selectLearningPath = async (learningPathId: number) => {
@@ -76,17 +86,13 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
     await refreshProgress(learningPathId);
   };
 
-  const refreshProgress = async (learningPathId: number) => {
-    const summary = await getProgressSummary(DEMO_USER_ID, learningPathId);
-    setProgress(summary);
-  };
+  const loadLearningPaths = async () => {
+    const data = await getLearningPaths();
+    setLearningPaths(data);
 
-  const clearExerciseArea = () => {
-    setConceptAnswer("");
-    setGeneratedExercise(null);
-    setCode("# Escribe tu solución aquí");
-    setFeedback("");
-    setScore(null);
+    if (data.length > 0) {
+      await selectLearningPath(data[0].id);
+    }
   };
 
   const explainConcept = async () => {
@@ -121,7 +127,7 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
       setCode("# Escribe tu solución aquí");
 
       const exercise = await generateExercise({
-        user_id: DEMO_USER_ID,
+        user_id: currentUser!.id, // Eliminado "?"
         topic_id: selectedTopic.id,
         language: selectedPath.language,
         difficulty: selectedPath.level,
@@ -144,7 +150,7 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
       setScore(null);
 
       const result = await submitCodeForReview({
-        user_id: DEMO_USER_ID,
+        user_id: currentUser!.id, // Eliminado "?"
         topic_id: selectedTopic.id,
         exercise: generatedExercise.description,
         code,
@@ -153,6 +159,11 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
       setFeedback(result.feedback);
       setScore(result.score);
+      setHistoryRefreshKey((currentValue) => currentValue + 1);
+
+      if (selectedPath) {
+        await refreshProgress(selectedPath.id);
+      }
     } catch (error) {
       setFeedback("Ocurrió un error al corregir y guardar el código.");
     } finally {
@@ -161,7 +172,7 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   };
 
   const handleCompleteTopic = async (topicId: number) => {
-    await completeTopic(DEMO_USER_ID, topicId);
+    await completeTopic(currentUser!.id, topicId); // Eliminado "?"
 
     if (selectedPath) {
       await refreshProgress(selectedPath.id);
@@ -172,6 +183,20 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
     return progress.completed_topic_ids.includes(topicId);
   };
 
+  // ==========================================
+  // 3. EFECTOS
+  // ==========================================
+  useEffect(() => {
+    loadLearningPaths();
+  }, []);
+
+  // ==========================================
+  // 4. RENDERIZADO (HTML / JSX)
+  // ==========================================
+  if (!currentUser) {
+    return <AuthPage onAuthSuccess={setCurrentUser} />;
+  }
+
   return (
     <main className="container">
       <h1>CodeTutor AI UFHEC</h1>
@@ -180,12 +205,28 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
         <div className="dashboard-card">
           <h2>Panel del estudiante</h2>
           <p>
-            <strong>Usuario:</strong> Estudiante Demo
+            <strong>Usuario:</strong> {currentUser.name}
           </p>
+
+          <p>
+            <strong>Correo:</strong> {currentUser.email}
+          </p>
+
+          <button
+            onClick={() => {
+              clearAuthData();
+              setCurrentUser(null);
+            }}
+          >
+            Cerrar sesión
+          </button>
+
+          {/* Corregida la etiqueta <p> de apertura aquí */}
           <p>
             <strong>Ruta activa:</strong>{" "}
             {selectedPath ? selectedPath.title : "Cargando..."}
           </p>
+
           <p>
             <strong>Progreso:</strong> {progress.percentage}%
           </p>
@@ -212,7 +253,9 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
             <button
               key={path.id}
               className={
-                selectedPath?.id === path.id ? "path-button active" : "path-button"
+                selectedPath?.id === path.id
+                  ? "path-button active"
+                  : "path-button"
               }
               onClick={() => selectLearningPath(path.id)}
             >
@@ -243,7 +286,9 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
             <div
               key={topic.id}
               className={
-                selectedTopic?.id === topic.id ? "topic-card selected" : "topic-card"
+                selectedTopic?.id === topic.id
+                  ? "topic-card selected"
+                  : "topic-card"
               }
               onClick={() => {
                 setSelectedTopic(topic);
@@ -349,6 +394,12 @@ const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
           )}
         </section>
       )}
+
+      <PracticeHistory
+        userId={currentUser.id} // Eliminado "?"
+        selectedTopicId={selectedTopic?.id}
+        refreshKey={historyRefreshKey}
+      />
     </main>
   );
 }
