@@ -74,3 +74,55 @@ export type AuthResponse = {
   token_type: string;
   user: AuthUser;
 };
+
+export type ChatHistoryItem = {
+  id: number;
+  user_id: number;
+  message: string;
+  response: string;
+  created_at: string;
+};
+
+export type ChatMessageResponse = {
+  response: string;
+  chat: ChatHistoryItem;
+};
+
+export type AssessmentQuestion = {
+  id: number;
+  question: string;
+  options: Record<string, string>;
+};
+
+export type AssessmentData = {
+  topic_id: number;
+  topic_title: string;
+  questions: AssessmentQuestion[];
+};
+
+export type AssessmentResultDetail = {
+  question_id: number;
+  question: string;
+  selected_option: string;
+  correct_option: string;
+  is_correct: boolean;
+  explanation: string;
+};
+
+export type AssessmentSubmitResponse = {
+  message: string;
+  score: number;
+  correct_answers: number;
+  total_questions: number;
+  feedback: string;
+  results: AssessmentResultDetail[];
+};
+
+export type SurveyPayload = {
+  usefulness: number;
+  ease_of_use: number;
+  ai_support: number;
+  recommendation: number;
+  favorite_feature: string;
+  comments?: string;
+};

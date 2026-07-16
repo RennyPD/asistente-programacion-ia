@@ -69,3 +69,26 @@ class Submission(SQLModel, table=True):
     ai_feedback: str
     score: Optional[int] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class AssessmentResult(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    topic_id: int = Field(foreign_key="topic.id")
+    total_questions: int
+    correct_answers: int
+    score: int
+    answers_json: str
+    feedback: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class SurveyResponse(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    usefulness: int
+    ease_of_use: int
+    ai_support: int
+    recommendation: int
+    favorite_feature: str
+    comments: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)

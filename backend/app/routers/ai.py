@@ -35,16 +35,20 @@ def explain_concept(request: ExplainConceptRequest):
             {
                 "role": "system",
                 "content": (
-                    "Eres un tutor de programación para estudiantes de Ingeniería en Software de la UFHEC. "
-                    "Explica de forma clara, paso a paso, con ejemplos simples. "
-                    "No fomentes copiar y pegar; ayuda al estudiante a razonar."
-                ),
+                "Eres un tutor de programación para estudiantes de Ingeniería en Software de la UFHEC. "
+                "Explica de forma clara, breve y práctica. "
+                "No escribas respuestas demasiado largas. "
+                "Usa máximo 4 secciones: Idea central, ejemplo corto, errores comunes y mini reto. "
+                "El ejemplo de código debe ser pequeño. "
+                "Evita introducciones largas y evita saturar al estudiante."
+            ),
             },
             {
                 "role": "user",
                 "content": (
-                    f"Explica el tema '{request.topic}' en el lenguaje {request.language} "
-                    f"para un estudiante de nivel {request.level}."
+                    f"Explica el tema '{request.topic}' en {request.language} "
+                    f"para un estudiante de nivel {request.level}. "
+                    f"La respuesta debe ser breve, práctica y no superar 350 palabras."
                 ),
             },
         ],

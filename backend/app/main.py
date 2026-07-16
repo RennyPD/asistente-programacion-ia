@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from app.db.database import create_db_and_tables, engine
 from app.models.models import User, LearningPath, Topic
-from app.routers import ai, learning_paths, progress, exercises, auth
+from app.routers import ai, learning_paths, progress, exercises, auth, chat, assessments, surveys
 
 
 app = FastAPI(
@@ -136,3 +136,6 @@ app.include_router(learning_paths.router, prefix="/api/learning-paths", tags=["R
 app.include_router(progress.router, prefix="/api/progress", tags=["Progreso"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["Ejercicios"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Autenticación"])
+app.include_router(chat.router, prefix="/api/chat", tags=["Chat inteligente"])
+app.include_router(assessments.router, prefix="/api/assessments", tags=["Autoevaluaciones"])
+app.include_router(surveys.router, prefix="/api/surveys", tags=["Encuesta de percepción"])
