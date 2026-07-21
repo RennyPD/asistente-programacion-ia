@@ -15,7 +15,7 @@ import {
 import type {
   AssessmentData,
   AssessmentSubmitResponse,
-} from "../types/learning";
+} from "../types/learnings";
 
 type SelfAssessmentProps = {
   topicId: number;

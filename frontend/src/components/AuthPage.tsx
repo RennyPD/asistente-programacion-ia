@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Brain, Code2, LineChart, ShieldCheck } from "lucide-react";
 import { loginUser, registerUser, saveAuthData } from "../services/authService";
-import type { AuthUser } from "../types/learning";
+import type { AuthUser } from "../types/learnings";
 
 type AuthPageProps = {
   onAuthSuccess: (user: AuthUser) => void;

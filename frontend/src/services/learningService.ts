@@ -1,5 +1,5 @@
 import { api } from "./api";
-import type { LearningPath, ProgressSummary, Topic } from "../types/learning";
+import type { LearningPath, ProgressSummary, Topic } from "../types/learnings";
 
 export const getLearningPaths = async (): Promise<LearningPath[]> => {
   const response = await api.get("/learning-paths/");
@@ -7,7 +7,7 @@ export const getLearningPaths = async (): Promise<LearningPath[]> => {
 };
 
 export const getLearningPathDetail = async (
-  learningPathId: number
+  learningPathId: number,
 ): Promise<{ learning_path: LearningPath; topics: Topic[] }> => {
   const response = await api.get(`/learning-paths/${learningPathId}`);
   return response.data;
@@ -15,7 +15,7 @@ export const getLearningPathDetail = async (
 
 export const getProgressSummary = async (
   userId: number,
-  learningPathId: number
+  learningPathId: number,
 ): Promise<ProgressSummary> => {
   const response = await api.get("/progress/summary", {
     params: {

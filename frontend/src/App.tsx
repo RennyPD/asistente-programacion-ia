@@ -10,7 +10,6 @@ import {
   generateExercise,
   submitCodeForReview,
 } from "./services/exerciseService";
-import CodeEditor from "./components/CodeEditor";
 import PracticeHistory from "./components/PracticeHistory";
 import type {
   Exercise,
@@ -30,7 +29,6 @@ import PracticeWorkspace from "./components/PracticeWorkspace";
 import {
   BarChart3,
   BookOpen,
-  Brain,
   ClipboardCheck,
   Code2,
   Home,
