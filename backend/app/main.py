@@ -208,6 +208,7 @@ allowed_origins = list(
         for origin in [
             "http://localhost:5173",
             "http://localhost:5174",
+            "https://asistente-programacion-ia.vercel.app",
             settings.FRONTEND_URL,
         ]
         if origin
